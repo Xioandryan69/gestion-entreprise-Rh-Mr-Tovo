@@ -1,0 +1,73 @@
+
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login</title>
+</head>
+<body>
+    <main>
+        <section>
+            <fieldset>
+                <legend>Authentification</legend>
+                <p>
+                    <label for="clogin">Utilisateur :</label><br>
+                    <input type="text" id="clogin" value="admin">
+                </p>
+                <p>
+                    <label for="cpassword">Mot de passe :</label><br>
+                    <input type="password" id="cpassword" value="admin123">
+                </p>
+                <p>
+                    <button>Se connecter</button>
+                </p>
+                <p id="message"></p>
+            </fieldset>
+        </section>
+    </main>
+
+    <script>
+        const connect = document.querySelector("button");
+        const message = document.getElementById("message");
+
+        connect.addEventListener("click", async () => {
+            const user = document.getElementById("clogin").value;
+            const pswd = document.getElementById("cpassword").value;
+
+            const donnee = {
+                utilisateur: user,
+                password: pswd
+            };
+
+            try {
+                const response = await fetch("/api/login", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify(donnee)
+                });
+
+                const resultat = await response.json();
+
+                console.log("Statut HTTP :", response.status);
+                console.log("Réponse du serveur :", resultat);
+
+                message.textContent = resultat.message;
+
+                if (resultat.success) {
+                    message.textContent =
+                        "Bienvenue, " + resultat.login + " !";
+                }
+            } catch (error) {
+                console.error(
+                    "Erreur lors de la connexion :", error
+                );
+                message.textContent =
+                    "Impossible de contacter le serveur.";
+            }
+        });
+    </script>
+</body>
+</html>

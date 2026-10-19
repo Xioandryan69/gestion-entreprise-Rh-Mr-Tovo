@@ -1,0 +1,1287 @@
+========================================
+ARBORESCENCE DU PROJET
+========================================
+
+./Back/controllers/include/LoginController.h
+./Back/controllers/source/LoginController.cpp
+./Back/core/include/Initializer.h
+./Back/core/source/Initializer.cpp
+./Back/database/include/Database.h
+./Back/database/source/Database.cpp
+./Back/repositories/include/LoginRepository.h
+./Back/repositories/source/LoginRepository.cpp
+./Back/routes/include/Api.h
+./Back/routes/include/Web.h
+./Back/routes/source/Api.cpp
+./Back/routes/source/Web.cpp
+./Back/server/include/Serveur.h
+./Back/server/source/Serveur.cpp
+./Back/services/include/LoginService.h
+./Back/services/source/LoginService.cpp
+./Back/utils/include/PageRouteur.h
+./Back/utils/include/PropertiesReader.h
+./Back/utils/include/Requete.h
+./Back/utils/include/Routeur.h
+./Back/utils/include/StaticFiles.h
+./Back/utils/source/PageRouteur.cpp
+./Back/utils/source/PropertiesReader.cpp
+./Back/utils/source/Requete.cpp
+./Back/utils/source/Routeur.cpp
+./Back/utils/source/StaticFiles.cpp
+./CMakeLists.txt
+./config/application.properties
+./Front/css/style.css
+./Front/favicon.ico
+./Front/index.html
+./Front/js/app.js
+./Front/page/login.html
+./main.cpp
+./Readme.md
+./run.sh
+
+========================================
+CONTENU DES FICHIERS
+========================================
+
+
+##################################################
+FICHIER : run.sh
+##################################################
+
+cd build;
+rm -rf *;
+
+if cmake ..; then
+    if make; then
+        sleep 2
+        clear
+        ./exec
+    else
+        echo "Erreur lors du MAKE"
+    fi
+else
+    echo "Erreur lors du CMAKE"
+fi
+
+
+##################################################
+FICHIER : main.cpp
+##################################################
+
+#include <QCoreApplication>
+
+#include <QSqlQuery>
+
+#include "Initializer.h"
+#include "Routeur.h"
+
+#include "LoginController.h"
+
+int main(int argc, char* argv[]) {
+    QCoreApplication app(argc,argv);
+
+    Initializer initializer;
+
+    if(!initializer.init()) {
+        qInfo() << "Erreur d'initialisation";
+        return 1;
+    }
+
+    return app.exec();
+}
+
+
+##################################################
+FICHIER : CMakeLists.txt
+##################################################
+
+cmake_minimum_required(VERSION 3.21)
+
+project(SERVEUR_HTTP)
+
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+
+configure_file(
+    "${CMAKE_SOURCE_DIR}/config/application.properties"
+    "${CMAKE_BINARY_DIR}/config/application.properties"
+    COPYONLY
+)
+
+file(
+    COPY        "${CMAKE_CURRENT_SOURCE_DIR}/Front"
+    DESTINATION "${CMAKE_CURRENT_BINARY_DIR}"
+)
+
+find_package(Qt6 REQUIRED COMPONENTS 
+    Core 
+    Network
+    HttpServer
+    Sql
+)
+
+set(HEADERS
+    Back/server/include/Serveur.h
+
+    Back/database/include/Database.h
+
+    Back/controllers/include/LoginController.h
+
+    Back/utils/include/PropertiesReader.h
+    Back/utils/include/Routeur.h
+    Back/utils/include/Requete.h
+    Back/utils/include/StaticFiles.h
+    Back/utils/include/PageRouteur.h
+
+    Back/core/include/Initializer.h
+
+    Back/routes/include/Web.h
+    Back/routes/include/Api.h
+
+    Back/repositories/include/LoginRepository.h
+
+    Back/services/include/LoginService.h
+)
+
+set(SOURCES
+    Back/server/source/Serveur.cpp
+
+    Back/database/source/Database.cpp
+
+    Back/controllers/source/LoginController.cpp
+
+    Back/utils/source/PropertiesReader.cpp
+    Back/utils/source/Routeur.cpp
+    Back/utils/source/Requete.cpp
+    Back/utils/source/StaticFiles.cpp
+    Back/utils/source/PageRouteur.cpp
+
+    Back/core/source/Initializer.cpp
+
+    Back/routes/source/Web.cpp
+    Back/routes/source/Api.cpp
+
+    Back/repositories/source/LoginRepository.cpp
+
+    Back/services/source/LoginService.cpp
+
+    main.cpp
+)
+
+add_executable(exec ${SOURCES} ${HEADERS})
+
+target_include_directories(exec PRIVATE
+    ${CMAKE_CURRENT_SOURCE_DIR}/Back/models/include
+    ${CMAKE_CURRENT_SOURCE_DIR}/Back/controllers/include
+    ${CMAKE_CURRENT_SOURCE_DIR}/Back/repositories/include
+    ${CMAKE_CURRENT_SOURCE_DIR}/Back/server/include
+    ${CMAKE_CURRENT_SOURCE_DIR}/Back/database/include
+    ${CMAKE_CURRENT_SOURCE_DIR}/Back/utils/include
+    ${CMAKE_CURRENT_SOURCE_DIR}/Back/core/include
+    ${CMAKE_CURRENT_SOURCE_DIR}/Back/routes/include
+    ${CMAKE_CURRENT_SOURCE_DIR}/Back/services/include
+)
+
+target_link_libraries(exec PRIVATE
+    Qt6::Core
+    Qt6::Network
+    Qt6::HttpServer
+    Qt6::Sql
+)
+
+
+##################################################
+FICHIER : Readme.md
+##################################################
+
+# DEPENDANCES: 
+
+## Outils de compilation
+
+```shell
+sudo apt update
+sudo apt install -y \
+    build-essential \
+    cmake \
+    ninja-build \
+    pkg-config \
+    git
+```
+
+## Qt6 et modules de compilations:
+
+```shell
+sudo apt install -y \
+    qt6-base-dev \
+    qt6-base-dev-tools \
+    qt6-httpserver-dev \
+    libqt6sql6-psql
+```
+
+
+
+##################################################
+FICHIER : Front/css/style.css
+##################################################
+
+body {
+    font-family: sans-serif;
+    text-align: center;
+    margin-top: 100px;
+    background: #eeeeee;
+}
+
+h1 {
+    color: green;
+}
+
+
+##################################################
+FICHIER : Front/page/login.html
+##################################################
+
+
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login</title>
+</head>
+<body>
+    <main>
+        <section>
+            <fieldset>
+                <legend>Authentification</legend>
+                <p>
+                    <label for="clogin">Utilisateur :</label><br>
+                    <input type="text" id="clogin" value="admin">
+                </p>
+                <p>
+                    <label for="cpassword">Mot de passe :</label><br>
+                    <input type="password" id="cpassword" value="admin123">
+                </p>
+                <p>
+                    <button>Se connecter</button>
+                </p>
+                <p id="message"></p>
+            </fieldset>
+        </section>
+    </main>
+
+    <script>
+        const connect = document.querySelector("button");
+        const message = document.getElementById("message");
+
+        connect.addEventListener("click", async () => {
+            const user = document.getElementById("clogin").value;
+            const pswd = document.getElementById("cpassword").value;
+
+            const donnee = {
+                utilisateur: user,
+                password: pswd
+            };
+
+            try {
+                const response = await fetch("/api/login", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify(donnee)
+                });
+
+                const resultat = await response.json();
+
+                console.log("Statut HTTP :", response.status);
+                console.log("Réponse du serveur :", resultat);
+
+                message.textContent = resultat.message;
+
+                if (resultat.success) {
+                    message.textContent =
+                        "Bienvenue, " + resultat.login + " !";
+                }
+            } catch (error) {
+                console.error(
+                    "Erreur lors de la connexion :", error
+                );
+                message.textContent =
+                    "Impossible de contacter le serveur.";
+            }
+        });
+    </script>
+</body>
+</html>
+
+
+
+##################################################
+FICHIER : Front/index.html
+##################################################
+
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Test serveur C++</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <h1>Mon serveur C++ fonctionne !</h1>
+    <p id="message">Chargement...</p>
+    <a href="/login">LOGIN</a>
+
+    <script src="/js/app.js"></script>
+</body>
+</html>
+
+
+##################################################
+FICHIER : Front/js/app.js
+##################################################
+
+document.getElementById("message").textContent =
+    "Le CSS et le JavaScript sont chargés !";
+
+
+##################################################
+FICHIER : Back/services/include/LoginService.h
+##################################################
+
+#pragma once
+
+#include "LoginRepository.h"
+
+#include <QString>
+#include <QJsonObject>
+
+class LoginService {
+private:
+    LoginRepository& repository;
+
+public:
+    explicit LoginService(LoginRepository& repo);
+
+    QJsonObject connecter(
+        const QString& login,
+        const QString& password
+    );
+};
+
+
+##################################################
+FICHIER : Back/services/source/LoginService.cpp
+##################################################
+
+#include "LoginService.h"
+
+LoginService::LoginService(LoginRepository& repo)
+    : repository(repo) {
+}
+
+QJsonObject LoginService::connecter(
+    const QString& login,
+    const QString& password
+) {
+    if (login.trimmed().isEmpty() || password.isEmpty()) {
+        return {
+            {"success", false},
+            {"message", "Login et mot de passe obligatoires"}
+        };
+    }
+
+    bool trouve = false;
+
+    QString motDePasseEnregistre =
+        repository.trouverMotDePasse(login.trimmed(), trouve);
+
+    if (!trouve || motDePasseEnregistre != password) {
+        return {
+            {"success", false},
+            {"message", "Identifiants incorrects"}
+        };
+    }
+
+    return {
+        {"success", true},
+        {"message", "Connexion réussie"},
+        {"login", login.trimmed()}
+    };
+}
+
+
+##################################################
+FICHIER : Back/core/include/Initializer.h
+##################################################
+
+#pragma once
+
+#include "PropertiesReader.h"
+#include "Serveur.h"
+#include "Database.h"
+#include "StaticFiles.h"
+#include "PageRouteur.h"
+#include "Routeur.h"
+#include "Api.h"
+#include "Web.h"
+
+#include <memory>
+
+class Initializer {
+    private:
+        PropertiesReader properties;
+        Serveur serveur;
+        Database base;
+
+        std::unique_ptr<PageRouteur> pageRouteur;
+        std::unique_ptr<Routeur> apiRouteur;
+
+        std::unique_ptr<StaticFiles> fichiersStatiques;
+
+        std::unique_ptr<Web> routeWeb;
+        std::unique_ptr<Api> routeApi;
+    public:
+        bool init();
+
+        bool initDatabase();
+        bool initServeur();
+        bool initFichierStatiques();
+        bool initPageRouteur();
+        bool initRouteur();
+
+        Serveur& getServeur();
+        Database& getDatabase();
+        PageRouteur& getPageRouteur();
+};
+
+
+##################################################
+FICHIER : Back/core/source/Initializer.cpp
+##################################################
+
+#include "Initializer.h"
+
+#include <QDir>
+#include <QCoreApplication>
+
+bool Initializer::init() {
+    QString chemin = "config/application.properties";
+
+    if(!properties.load(chemin)) {
+        return false;
+    }
+    if(!initDatabase()) {
+        return false;
+    }
+    if(!initServeur()) {
+        return false;
+    }
+    if(!initFichierStatiques()) {
+        return false;
+    }
+    if(!initPageRouteur()) {
+        return false;
+    }   
+    if(!initRouteur()) {
+        return false;
+    }
+
+    routeWeb = std::make_unique<Web>(*pageRouteur);
+    routeWeb->declarationDesRoutesWeb();
+
+    routeApi = std::make_unique<Api>(*apiRouteur, base);
+    routeApi->declarationDesRoutesApi();
+
+    if (!serveur.lancerServeur()) {
+        qCritical() << "Erreur lors du lancement du serveur";
+        return false;
+    }
+
+return true;
+
+
+}   
+
+bool Initializer::initDatabase() {
+    if(!base.initDatabase(
+        properties.get("database.driver"),
+        properties.get("database.host"),
+        properties.get("database.port").toUShort(),
+        properties.get("database.name"),
+        properties.get("database.user"),
+        properties.get("database.password")   
+    )) {
+        return false;
+    }
+    return true;
+}
+
+bool Initializer::initServeur() {
+    serveur.initServeur(
+        properties.get("server.port").toUShort()
+    );
+    return true;
+}
+
+bool Initializer::initFichierStatiques() {
+    // Récupérer le dossier Front depuis la configuration
+    QString dossier = QDir(
+        QCoreApplication::applicationDirPath()
+    ).filePath(properties.get("server.static_dir"));
+
+    fichiersStatiques = std::make_unique<StaticFiles>(dossier);
+
+    // Enregistrer le moteur de fichiers sur le serveur HTTP
+    fichiersStatiques->enregistrer(serveur.getHttpServer());
+    return true;
+}
+
+bool Initializer::initPageRouteur() {
+    pageRouteur = std::make_unique<PageRouteur>(
+        serveur.getHttpServer(),properties.get("server.static_dir")
+    );
+    return true;
+}
+
+bool Initializer::initRouteur() {
+    apiRouteur = std::make_unique<Routeur>(serveur.getHttpServer());
+    return true;
+}
+
+Database& Initializer::getDatabase() {
+    return base;
+}
+
+Serveur& Initializer::getServeur() {
+    return serveur;
+}
+
+PageRouteur& Initializer::getPageRouteur() {
+    return *pageRouteur;
+}
+
+
+##################################################
+FICHIER : Back/routes/include/Web.h
+##################################################
+
+#pragma once
+
+#include "PageRouteur.h"
+
+class Web {
+    private:
+        PageRouteur& pageRouteur;
+    public:
+        Web(PageRouteur& pr);
+        
+        void declarationDesRoutesWeb();
+};
+
+
+##################################################
+FICHIER : Back/routes/include/Api.h
+##################################################
+
+#pragma once
+
+#include "Routeur.h"
+#include "LoginController.h"
+#include "Database.h"
+
+class Api {
+    private:
+        Routeur& routeur;
+        Database& database;
+
+        LoginRepository loginRepository;
+        LoginService loginService;
+        LoginController loginController;
+        
+    public:
+        Api(Routeur& routeur, Database& database);
+
+        void declarationDesRoutesApi();
+};
+
+
+##################################################
+FICHIER : Back/routes/source/Api.cpp
+##################################################
+
+#include "Api.h"
+
+Api::Api(Routeur& route, Database& data)
+    : routeur(route),
+      database(data),
+      loginRepository(database),
+      loginService(loginRepository),
+      loginController(loginService) {
+}
+
+void Api::declarationDesRoutesApi() {
+    routeur.post("/api/login", [this](const Requete& req) {
+        return loginController.login(req);
+    });
+}
+
+
+##################################################
+FICHIER : Back/routes/source/Web.cpp
+##################################################
+
+#include "Web.h"
+
+Web::Web(PageRouteur& pr) : pageRouteur(pr) {}
+
+void Web::declarationDesRoutesWeb() {
+    pageRouteur.page("/login","page/login.html");
+}
+
+
+##################################################
+FICHIER : Back/database/include/Database.h
+##################################################
+
+#pragma once
+
+#include <QSqlDatabase>
+
+class Database {
+    private:
+        QSqlDatabase connection;
+    
+    public:
+        Database();
+        ~Database();
+
+        QSqlDatabase getConnection();
+
+        bool initDatabase(const QString& driver, const QString& host, 
+                            const quint16& port, const QString& database,
+                                const QString& user, const QString& password);
+        void closeConnection();
+};
+
+
+##################################################
+FICHIER : Back/database/source/Database.cpp
+##################################################
+
+#include "Database.h"
+
+#include "QSqlError"
+#include <QDebug>
+
+
+Database::Database() {}
+
+Database::~Database() {
+    closeConnection();
+}
+
+QSqlDatabase Database::getConnection() {
+    if(!connection.isOpen()) {
+        if(!connection.open()) {
+            qCritical() << "Erreur PostgreSQL: " 
+                        << connection.lastError().text();
+            return QSqlDatabase();
+        }
+    }
+    return connection;
+}
+
+bool Database::initDatabase(const QString& driver, const QString& host, const quint16& port, const QString& database,
+const QString& user, const QString& password) {
+    connection = QSqlDatabase::addDatabase(driver);
+
+    connection.setHostName(host);
+    connection.setPort(port);
+    connection.setDatabaseName(database);
+    connection.setUserName(user);
+    connection.setPassword(password);
+
+    return true;
+}
+
+void Database::closeConnection() {
+    if(connection.isOpen()) {
+        connection.close();
+    }
+}
+
+
+##################################################
+FICHIER : Back/repositories/include/LoginRepository.h
+##################################################
+
+#pragma once
+
+#include "Database.h"
+
+#include <QString>
+
+class LoginRepository {
+private:
+    Database& base;
+
+public:
+    explicit LoginRepository(Database& database);
+
+    QString trouverMotDePasse(
+        const QString& login,
+        bool& trouve
+    );
+};
+
+
+##################################################
+FICHIER : Back/repositories/source/LoginRepository.cpp
+##################################################
+
+#include "LoginRepository.h"
+
+#include <QSqlQuery>
+#include <QSqlError>
+#include <QVariant>
+#include <QDebug>
+
+LoginRepository::LoginRepository(Database& database)
+    : base(database) {
+}
+
+QString LoginRepository::trouverMotDePasse(
+    const QString& login,
+    bool& trouve
+) {
+    trouve = false;
+
+    QSqlQuery query(base.getConnection());
+
+    query.prepare(
+        "SELECT password FROM Logins WHERE login = :login"
+    );
+
+    query.bindValue(":login", login);
+
+    if (!query.exec()) {
+        qWarning() << "Erreur SQL :" << query.lastError().text();
+        return {};
+    }
+
+    if (!query.next()) {
+        return {};
+    }
+
+    trouve = true;
+    return query.value(0).toString();
+}
+
+
+##################################################
+FICHIER : Back/controllers/include/LoginController.h
+##################################################
+
+#pragma once
+
+#include "LoginService.h"
+#include "Routeur.h"
+
+class LoginController {
+private:
+    LoginService& service;
+
+public:
+    explicit LoginController(LoginService& loginService);
+
+    QJsonObject login(const Requete& requete);
+};
+
+
+##################################################
+FICHIER : Back/controllers/source/LoginController.cpp
+##################################################
+
+#include "LoginController.h"
+
+LoginController::LoginController(LoginService& loginService)
+    : service(loginService) {
+}
+
+QJsonObject LoginController::login(const Requete& requete) {
+    QJsonObject donnees = requete.json();
+
+    QString login = donnees.value("utilisateur").toString();
+    QString password = donnees.value("password").toString();
+
+    return service.connecter(login, password);
+}
+
+
+##################################################
+FICHIER : Back/server/include/Serveur.h
+##################################################
+
+#pragma once
+
+#include <QHttpServer>
+#include <QTcpServer>
+
+class Serveur {
+    private:
+        quint16     port;
+        QHttpServer httpServer;
+        QTcpServer  tcpServer;
+
+    public:   
+        Serveur();
+        ~Serveur();
+
+        QHttpServer& getHttpServer();
+        QTcpServer& getTcpServer();
+
+        void initServeur(quint16 p);
+
+        bool lancerServeur();
+};
+
+
+##################################################
+FICHIER : Back/server/source/Serveur.cpp
+##################################################
+
+#include "Serveur.h"
+
+#include "PropertiesReader.h"
+
+Serveur::Serveur() {}
+
+Serveur::~Serveur() {}
+
+QHttpServer& Serveur::getHttpServer() {
+    return httpServer;
+}
+
+QTcpServer& Serveur::getTcpServer() {
+    return tcpServer;
+}
+
+bool Serveur::lancerServeur() {
+    if(!tcpServer.listen(QHostAddress::Any, port)) {
+        qCritical() << tcpServer.errorString();
+        return false;
+    }
+    
+    httpServer.bind(&tcpServer);
+
+    qInfo() << "SERVEUR DEMARER SUR LE PORT:"
+            << tcpServer.serverPort();
+
+    return true;
+}
+
+void Serveur::initServeur(quint16 p) {
+    port = p;
+}
+
+
+##################################################
+FICHIER : Back/utils/include/Routeur.h
+##################################################
+
+#pragma once
+
+#include <functional>
+
+#include <QHttpServer>
+#include <QHttpServerResponse>
+#include <QJsonDocument>
+#include <QJsonObject>
+
+#include "Requete.h"
+
+class Routeur {
+    private:
+        QHttpServer& serveur;
+
+        QHttpServerResponse convertirJSON(const QJsonObject& json) const;
+
+    public:
+        explicit Routeur(QHttpServer& serveur);
+
+        void get(const QString& url,std::function<QJsonObject(const Requete&)>action);
+        void post(const QString& url,std::function<QJsonObject(const Requete&)>action);
+        void put(const QString& url,std::function<QJsonObject(const Requete&)>action);
+        void pacth(const QString& url,std::function<QJsonObject(const Requete&)>action);
+        void sup(const QString& url,std::function<QJsonObject(const Requete&)>action);
+};
+
+
+##################################################
+FICHIER : Back/utils/include/PropertiesReader.h
+##################################################
+
+#pragma once
+
+#include <QMap>
+
+class PropertiesReader {
+    private:
+        QMap<QString,QString> properties;
+    public:
+        bool load(const QString& chemin);
+
+        QString get(const QString& clee, const QString& valeurParDefaut = "") const;
+};
+
+
+##################################################
+FICHIER : Back/utils/include/PageRouteur.h
+##################################################
+
+#pragma once
+
+#include <QHttpServer>
+#include <QString>
+
+class PageRouteur {
+    private:
+        QHttpServer& serveur;
+        QString dossier;
+    public:
+        PageRouteur(QHttpServer& serve, const QString& dossierFront);
+
+        void page(const QString& url, const QString& fichier);
+};
+
+
+##################################################
+FICHIER : Back/utils/include/Requete.h
+##################################################
+
+#pragma once
+
+#include <QHttpServerRequest>
+#include <QUrlQuery>
+#include <QJsonDocument>
+#include <QJsonObject>
+#include <QString>
+
+class Requete {
+    private:
+        QHttpServerRequest requete;
+
+    public:
+        explicit Requete(const QHttpServerRequest& requete);
+
+        int queryInt(const QString& nom, const int valeurParDefaut = 0) const;
+
+        bool queryBool(const QString& nom, const bool valeurParDefaut = false) const;
+
+        QString queryString(const QString& nom, const QString& valeurParDefaut = "") const;
+
+        QString header(const QString& nom) const;
+
+        QByteArray body() const;
+        QJsonObject json() const;
+};
+
+
+##################################################
+FICHIER : Back/utils/include/StaticFiles.h
+##################################################
+
+#pragma once
+
+#include <QHttpServer>
+#include <QString>
+
+class StaticFiles {
+    private:
+        QString dossier;
+    public:
+        explicit StaticFiles(const QString& chemin);
+
+        void enregistrer(QHttpServer& serveur);
+};
+
+
+##################################################
+FICHIER : Back/utils/source/StaticFiles.cpp
+##################################################
+
+#include "StaticFiles.h"
+
+#include <QFile>
+#include <QFileInfo>
+#include <QMimeDatabase>
+#include <QHttpServerResponder>
+#include <QDir>
+
+StaticFiles::StaticFiles(const QString& chemin)
+    : dossier(QDir(chemin).absolutePath()) {
+}
+
+void StaticFiles::enregistrer(QHttpServer& serveur) {
+    serveur.setMissingHandler(
+        &serveur,
+        [this](const QHttpServerRequest& requete, QHttpServerResponder& reponse) {
+            QString chemin = requete.url().path();
+
+            if(chemin == "/") {
+                chemin = "/index.html";
+            }
+
+            QString fichier = QDir(dossier).filePath(chemin.mid(1));
+            QFileInfo info(fichier);
+
+            if(!info.exists() || !info.isFile()) {
+                reponse.write(
+                    "Fichier Introuvable",
+                    "text/plain",
+                    QHttpServerResponder::StatusCode::NotFound
+                );
+                return;
+            }
+
+            QFile f(fichier);
+
+            if(!f.open(QIODevice::ReadOnly)) {
+                reponse.write(
+                    "Impossible de lire le fichier",
+                    "text/plain",
+                    QHttpServerResponder::StatusCode::NotFound
+                );
+                return;
+            }
+
+            QByteArray contenu = f.readAll();
+
+            QMimeDatabase mime;
+            QByteArray type = mime.mimeTypeForFile(info).name().toUtf8();
+
+            reponse.write(
+                contenu,
+                type,
+                QHttpServerResponder::StatusCode::Ok
+            );
+        }
+    );
+}
+
+
+##################################################
+FICHIER : Back/utils/source/PropertiesReader.cpp
+##################################################
+
+#include "PropertiesReader.h"
+
+#include <QFile>
+#include <QDebug>
+#include <QDir>
+#include <QTextStream>
+
+bool PropertiesReader::load(const QString& chemin) {
+    QFile fichier(chemin);
+
+    if(!fichier.open(QIODevice::ReadOnly | QIODevice::Text)) {
+        qCritical() << "Impossible d'ouvrire le fichier";
+        return false;
+    }
+
+    QTextStream flux(&fichier);
+
+    while(!flux.atEnd()) {
+        QString ligne = flux.readLine().trimmed();
+        if(ligne.isEmpty() || ligne.startsWith("#") || ligne.startsWith("!")) {
+            continue;
+        }
+        int separateur = ligne.indexOf("=");
+        if(separateur == -1) {
+            continue;
+        }
+        QString clee = ligne.left(separateur).trimmed();
+        QString valeur = ligne.mid(separateur+1).trimmed();
+        properties.insert(clee,valeur);
+    }
+    return true;
+}
+
+QString PropertiesReader::get(const QString& clee, const QString& valeurParDefaut) const {
+    return properties.value(clee,valeurParDefaut);
+}
+
+
+##################################################
+FICHIER : Back/utils/source/Requete.cpp
+##################################################
+
+#include "Requete.h"
+
+Requete::Requete(const QHttpServerRequest& req) : requete(req) {}
+
+QString Requete::queryString(const QString& nom, const QString& valeurParDefaut) const {
+    QUrlQuery params(requete.url());
+    if(!params.hasQueryItem(nom)) {
+        return valeurParDefaut;
+    }
+    return params.queryItemValue(nom);
+}
+
+int Requete::queryInt(const QString& nom, const int valeurParDefaut) const {
+    bool ok = false;
+    QString val = queryString(nom);
+
+    if(val.isEmpty()) {
+        return valeurParDefaut;
+    }
+    int resultat = val.toInt(&ok);
+    
+    if(!ok) {
+        return valeurParDefaut;
+    }
+    return resultat;
+}
+
+bool Requete::queryBool(const QString& nom, const bool valeurParDefaut) const {
+    QString valeur = queryString(nom).toLower();
+    
+    if(valeur == "true" || valeur == "1") {
+        return true;
+    }
+    if(valeur == "false" || valeur == "0") {
+        return false;
+    }
+
+    return valeurParDefaut;
+}
+
+QString Requete::header(const QString& nom) const {
+    return QString::fromUtf8(
+        requete.value(nom.toUtf8())  
+    );
+}
+
+QByteArray Requete::body() const {
+    return requete.body();
+}
+
+QJsonObject Requete::json() const {
+    QJsonParseError erreur;
+    QJsonDocument document = QJsonDocument::fromJson(requete.body(), &erreur);
+    if(erreur.error != QJsonParseError::NoError || !document.isObject()) {
+        return {};
+    }
+    return document.object();
+}
+
+
+##################################################
+FICHIER : Back/utils/source/PageRouteur.cpp
+##################################################
+
+#include "PageRouteur.h"
+
+#include <QFile>
+#include <QDir>
+#include <QHttpServerResponse>
+
+PageRouteur::PageRouteur(QHttpServer& serve, const QString& doc) : serveur(serve), dossier(doc) {}
+
+void PageRouteur::page(const QString& url, const QString& fichier) {
+    QString chemin = QDir(dossier).filePath(fichier);
+
+    serveur.route(
+        url,
+        QHttpServerRequest::Method::Get,
+        [chemin]() -> QHttpServerResponse {
+            QFile f(chemin);
+
+            if(!f.open(QIODevice::ReadOnly)) {
+                return QHttpServerResponse(
+                    QHttpServerResponder::StatusCode::NotFound
+                );
+            }
+
+            return QHttpServerResponse(
+                "text/html; charset=utf-8",
+                f.readAll()
+            );
+        }
+    );
+}
+
+
+
+##################################################
+FICHIER : Back/utils/source/Routeur.cpp
+##################################################
+
+#include "Routeur.h"
+
+QHttpServerResponse Routeur::convertirJSON(const QJsonObject& json) const {
+    return QHttpServerResponse(
+        "application/json",
+        QJsonDocument(json).toJson(QJsonDocument::Compact)
+    );
+}
+
+Routeur::Routeur(QHttpServer& serve) : serveur(serve) {}
+
+void Routeur::get(const QString& url, std::function<QJsonObject(const Requete&)>action) {
+    serveur.route(
+        url,
+        QHttpServerRequest::Method::Get,
+        [this,action](const QHttpServerRequest& request) {
+            Requete req(request);
+            return convertirJSON(action(req));
+        }
+    );
+}
+
+void Routeur::post(const QString& url, std::function<QJsonObject(const Requete&)>action) {
+    serveur.route(
+        url,
+        QHttpServerRequest::Method::Post,
+        [this,action](const QHttpServerRequest& request) {
+            Requete req(request);
+            return convertirJSON(action(req));
+        }
+    );
+}
+
+void Routeur::put(const QString& url, std::function<QJsonObject(const Requete&)>action) {
+    serveur.route(
+        url,
+        QHttpServerRequest::Method::Put,
+        [this,action](const QHttpServerRequest& request) {
+            Requete req(request);
+            return convertirJSON(action(req));
+        }
+    );
+}
+
+void Routeur::pacth(const QString& url, std::function<QJsonObject(const Requete&)>action) {
+    serveur.route(
+        url,
+        QHttpServerRequest::Method::Patch,
+        [this,action](const QHttpServerRequest request) {
+            Requete req(request);
+            return convertirJSON(action(req));
+        }
+    );
+}
+
+void Routeur::sup(const QString& url, std::function<QJsonObject(const Requete&)>action) {
+    serveur.route(
+        url,
+        QHttpServerRequest::Method::Delete,
+        [this,action](const QHttpServerRequest request) {
+            Requete req(request);
+            return convertirJSON(action(req));
+        }
+    );
+}
+
