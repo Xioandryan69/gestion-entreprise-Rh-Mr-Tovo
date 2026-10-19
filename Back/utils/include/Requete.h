@@ -8,7 +8,7 @@
 
 class Requete {
     private:
-        QHttpServerRequest requete;
+        const QHttpServerRequest& requete;
 
     public:
         explicit Requete(const QHttpServerRequest& requete);

@@ -46,7 +46,7 @@ void Routeur::pacth(const QString& url, std::function<QJsonObject(const Requete&
     serveur.route(
         url,
         QHttpServerRequest::Method::Patch,
-        [this,action](const QHttpServerRequest request) {
+        [this,action](const QHttpServerRequest& request) { // Ajout du '&' ici
             Requete req(request);
             return convertirJSON(action(req));
         }
@@ -57,7 +57,7 @@ void Routeur::sup(const QString& url, std::function<QJsonObject(const Requete&)>
     serveur.route(
         url,
         QHttpServerRequest::Method::Delete,
-        [this,action](const QHttpServerRequest request) {
+        [this,action](const QHttpServerRequest& request) { // Ajout du '&' ici
             Requete req(request);
             return convertirJSON(action(req));
         }

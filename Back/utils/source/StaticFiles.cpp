@@ -9,11 +9,9 @@
 StaticFiles::StaticFiles(const QString& chemin)
     : dossier(QDir(chemin).absolutePath()) {
 }
-
 void StaticFiles::enregistrer(QHttpServer& serveur) {
     serveur.setMissingHandler(
-        &serveur,
-        [this](const QHttpServerRequest& requete, QHttpServerResponder& reponse) {
+        [this](const QHttpServerRequest& requete, QHttpServerResponder&& reponse) { // Ajout de && ici
             QString chemin = requete.url().path();
 
             if(chemin == "/") {
